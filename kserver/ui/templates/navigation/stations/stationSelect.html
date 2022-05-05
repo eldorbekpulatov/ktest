@@ -1,0 +1,44 @@
+{% extends "navigation/navbar.html" %}
+{% load static %}
+
+
+{% block form %}
+
+
+<form method="post">
+    {% csrf_token %}
+    <div class="container mt-5 mb-3">
+    
+        <div class="card text-center">
+
+            <div class="card-header">
+                <h5 class="card-title">Select a test station</h5>
+            </div>
+
+            <div class="card-body" style="overflow-y: scroll; max-height: 90%;">
+                {% for station in form.testStation %}
+                <ul class="list-group" style="padding:5px;">
+                    <li class="list-group-item" id="{{ modelType.id_for_label }}" style="font-size: 4vh;">
+                        {{station.tag}}
+                        <a class="text-white btn-floating btn-fb btn-lg">
+                            <i class="fa fa-codepen fa-2x" style="color: black;"></i>
+                        </a>
+                        {{station.choice_label}}
+                        {{station.status}}
+                    </li>
+                </ul>
+                {% endfor %}
+        
+            </div>
+
+            <div class="card-footer text-muted">
+                <button class="btn btn-secondary pull-left" onclick="location.href = {{backURL}};">Back: Select Power Supply</button>
+                <button type="submit" class="btn btn-primary pull-right">Next: Select Test</button>
+            </div>
+
+        </div>
+    </div>
+</form>
+    
+
+{% endblock %}  

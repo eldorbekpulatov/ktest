@@ -1,0 +1,21 @@
+{% extends "navigation/navbar.html" %}
+{% load static %}
+
+
+{% block form %}
+
+{{ station.name }}
+<hr>
+{{ station.token }}
+<hr>
+{{ station.hostName }}
+<hr>
+{{ station.portNumber }}
+<hr>
+{{ station.instruments }}
+<hr>
+{{ station.lastModified }}
+<hr>
+{{ station.firstEntered }}
+
+{% endblock %}  

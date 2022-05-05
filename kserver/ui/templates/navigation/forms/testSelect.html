@@ -1,0 +1,41 @@
+{% extends "navigation/navbar.html" %}
+{% load static %}
+
+
+{% block form %}
+
+
+<div class="container mt-5 mb-3">
+    <div class="card text-center">
+
+        <div class="card-header">
+            <h5 class="card-title">Select test scripts</h5>
+        </div>
+
+        <div class="card-body" style="overflow-y: scroll; max-height: 90%;">
+            {% for testScript in testScripts %}
+            <ul class="list-group" style="padding:5px;">
+                <li class="list-group-item" id="{{ testScript.pk }}" style="font-size: 4vh;">
+                    
+                    <a class="text-white btn-floating btn-fb btn-lg">
+                        <i class="fa fa-codepen fa-2x" style="color: black;"></i>
+                    </a>
+                    {{testScript.name}}
+                    
+                </li>
+            </ul>
+            {% endfor %}
+    
+        </div>
+
+        <div class="card-footer text-muted">
+            <form action="{{backURL}}">
+                <button type="submit" class="btn btn-secondary pull-left">Back: Select Model Type</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}  

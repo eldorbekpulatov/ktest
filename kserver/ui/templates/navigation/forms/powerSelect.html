@@ -1,0 +1,43 @@
+{% extends "navigation/navbar.html" %}
+{% load static %}
+
+
+{% block form %}
+
+
+<form method="post">
+    {% csrf_token %}
+    <div class="container mt-5 mb-3">
+    
+        <div class="card text-center">
+
+            <div class="card-header">
+                <h5 class="card-title">Select a power supply</h5>
+            </div>
+
+            <div class="card-body" style="overflow-y: scroll; max-height: 90%;">
+                {% for powerSupply in form.powerSupply %}
+                <ul class="list-group" style="padding:5px;">
+                    <li class="list-group-item" id="{{ powerSupply.id_for_label }}" style="font-size: 4vh;">
+                        {{powerSupply.tag}}
+                        <a class="text-white btn-floating btn-fb btn-lg">
+                            <i class="fa fa-codepen fa-2x" style="color: black;"></i>
+                        </a>
+                        {{powerSupply.choice_label}}
+                        
+                    </li>
+                </ul>
+                {% endfor %}
+        
+            </div>
+
+            <div class="card-footer text-muted">
+                <button type="submit" class="btn btn-primary pull-right">Next: Select Model Type</button>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+
+{% endblock %}  
