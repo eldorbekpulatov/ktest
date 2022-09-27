@@ -1,1 +1,1 @@
-web: gunicorn ad.wsgi
+web: gunicorn ktestui.wsgi

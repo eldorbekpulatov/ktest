@@ -1,5 +1,3 @@
-
-import io
 import os
 import sys
 import requests
@@ -8,20 +6,19 @@ from datetime import date
 from datetime import datetime
 from PyQt5 import QtWidgets
 from PyQt5.uic import loadUi
-from PyQt5.QtCore import QRegExp
-from PyQt5.QtGui import QRegExpValidator
 
 
 #config parameters 
 HOST_URL = "http://127.0.0.1:8000"
 API_URL =  "http://127.0.0.1:8000/api"
-SCRIPTS_DIR = os.path.join(os.getcwd(),'scripts')
+DOWNLOAD_DIR = os.path.join(os.getcwd(),'downloads')
 LOGS_DIR = os.path.join(os.getcwd(),'logs')
+
 
 
 class Session():
     def __init__(self, token):
-        self.__token__ = token
+        self.__token = token
         self.user = None
         self.station = None
         self.product = None
@@ -29,8 +26,8 @@ class Session():
         self.stage = 0
 
     def getAuth(self):
-        return {"Authorization": "Token "+self.__token__}
-
+        return {"Authorization": "Token "+self.__token}
+ 
     def incrementStage(self):
         self.stage += 1
         self.__cleanse__()
@@ -47,7 +44,7 @@ class Session():
     def setStation(self, station):
         if station:
             instruments_parsed = {'dvm':[],'osc':[],'eload':[],'rctrl':[],'actrl':[]}  
-            for instrument in station['instrument_set']: 
+            for instrument in station['instruments']: 
                 if instrument['type'] in instruments_parsed:
                     instruments_parsed[instrument['type']].append(instrument)
                 else:
@@ -109,11 +106,11 @@ class Index(QtWidgets.QDialog):
         self.prevButton.clicked.connect(self.prevStep)
         self.update()
 
-    def populate(self):
-        self.errorMessege.setText("")
+    def populateInformation(self):
         self.fullName.setText(self.session.user['first_name']+" "+self.session.user['last_name'])
         self.userName.setText(self.session.user['username'])
         self.email.setText(self.session.user['email'])
+        self.errorMessege.setText("")
         self.progressBar.setValue(int(self.session.stage/4*100))
         if self.listWidget.count() > 0:
             self.listWidget.setCurrentRow(0)
@@ -211,7 +208,7 @@ class Index(QtWidgets.QDialog):
             self.setModel()
             widget.addWidget(Run(self.session))
             widget.setCurrentIndex(widget.currentIndex()+1)
-        self.populate()
+        self.populateInformation()
 
 
 class Run(QtWidgets.QDialog):
@@ -223,19 +220,18 @@ class Run(QtWidgets.QDialog):
         self.reloadButton.clicked.connect(self.reload)
         self.submitButton.clicked.connect(self.submit)
         self.runAllButton.clicked.connect(self.runAll)
-        self.runSelButton.clicked.connect(self.runSelected)
-        self.populate()
-        
-    def populate(self):
+        self.runSelectedButton.clicked.connect(self.runSelected)
+        self.populateInformation()
+    
+    def populateInformation(self):
         self.testLogsWidget.clear()
         self.errorMessege.setText("")
-        self.submitButton.setEnabled(False)
-        self.progressBar.setValue(int(self.session.stage/4*100))
         self.stationTitle.setText(str(self.session.station['name']))
         self.productTitle.setText(str(self.session.product['name'])+" "+str(self.session.model['name']))
         self.fillInstrumentsTable()
         self.fillScriptsList()
-        
+        self.progressBar.setValue(int(self.session.stage/4*100))
+
     def fillInstrumentsTable(self):
         key = 'name'  # populate instrument table based on key
         dvmString = [ dvm[key] for dvm in self.session.station['instruments']['dvm'] ]
@@ -258,7 +254,6 @@ class Run(QtWidgets.QDialog):
             self.listWidget.setCurrentRow(0)
 
     def cancel(self):
-        self.flushScripts()
         self.session.decrementStage()
         widget.removeWidget(widget.currentWidget())
         widget.currentWidget().update()
@@ -269,7 +264,6 @@ class Run(QtWidgets.QDialog):
         widget.setCurrentIndex(widget.currentIndex()+1)
 
     def reload(self):
-        self.flushScripts()
         data = {
             'station_id':self.session.station['id'],
             'product_id':self.session.product['id'],
@@ -282,7 +276,7 @@ class Run(QtWidgets.QDialog):
             self.session.setStation(response.json()['station'])
             self.session.setProduct(response.json()['product'])
             self.session.setModel(response.json()['model'])
-        self.populate()
+        self.populateInformation()
 
     def runAll(self):
         for i in range(self.listWidget.count()):
@@ -290,7 +284,6 @@ class Run(QtWidgets.QDialog):
         self.runSelected()
 
     def runSelected(self):
-        self.flushScripts()
         self.testLogsWidget.clear()
         self.errorMessege.setText("")
         if len(self.listWidget.selectedItems()) > 0:
@@ -301,7 +294,7 @@ class Run(QtWidgets.QDialog):
                     self.downloadScript(script[1])
                     self.validateScript(script[1])  
                     self.executeScript(script[1])
-            self.submitButton.setEnabled(True)
+                    # self.flushScript(script[1])
         else:
             self.errorMessege.setText("No test was selected. Please select at least one to execute.")
 
@@ -310,8 +303,8 @@ class Run(QtWidgets.QDialog):
         if response.status_code != 200:
             self.errorMessege.setText(str(response)+":"+str(response.url))
         else:
-            filename = str(script['id'])+".py"
-            filepath = os.path.join(SCRIPTS_DIR, filename)
+            _, filename = os.path.split(script['file'])
+            filepath = os.path.join(DOWNLOAD_DIR, filename)
             with open(filepath, 'w') as file:
                 file.write(response.text)
             script['filepath'] = filepath
@@ -343,62 +336,42 @@ class Run(QtWidgets.QDialog):
 
         if os.path.exists(script['filepath']):
             result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout = result.stdout.decode('utf-8').replace("\n","")
-            stderr = result.stderr.decode('utf-8').replace("\n","")
+            stdout = result.stdout.decode('utf-8')
+            stderr = result.stderr.decode('utf-8')
             if len(stderr)>0:
                 self.errorMessege.setText("Unexpected error occurred while executing the script.")
             else:
-                log_string = 60*["."]
-                log_string[0:len(script["name"])]= script["name"]
-                log_string[-1*len(stdout):] = stdout
-                item = QtWidgets.QListWidgetItem("".join(log_string), type=int(script["id"]))
+                item = QtWidgets.QListWidgetItem(stdout, type=int(script["id"]))
                 self.testLogsWidget.addItem(item)
                 script["logpath"] = logPath
-                script["status"] = stdout
         else:
             self.errorMessege.setText("Invalid filepath. Script was not downloaded.")
-        
-    def flushScripts(self):
-        for f in os.listdir(SCRIPTS_DIR):
-            os.remove(os.path.join(SCRIPTS_DIR, f))
-        for f in os.listdir(LOGS_DIR):
-            os.remove(os.path.join(LOGS_DIR, f))
-        for script in self.session.model["scripts"]:
-            if "filepath" in script:
-                del(script["filepath"])
-            if "logpath" in script:
-                del(script["logpath"])
-            if "requirements" in script:
-                del(script["requirements"])
 
-    
+    def flushScript(self, script):
+        if os.path.exists(script['filepath']):
+            os.remove(script['filepath'])
+        if os.path.exists(script['logpath']):
+            os.remove(script['logpath'])
+        del(script["filepath"])
+        del(script["requirements"])
+        del(script["logpath"])
+        
+
 class Card(QtWidgets.QDialog):
     def __init__(self, session):
         super(Card,self).__init__()
         loadUi("./ui/card.ui", self)
         self.session = session
-        reg_ex = QRegExp("^[A-Z|a-z][0-9]{6,7}$")
-        validator = QRegExpValidator(reg_ex, self.serialInput)
-        self.serialInput.setValidator(validator)
         self.exitButton.clicked.connect(self.cancel)
-        self.submitButton.clicked.connect(self.getSerial)
-        self.serialInput.textChanged.connect(self.validateSerial)
-        self.populate()
+        self.submitButton.clicked.connect(self.submit)
+        self.populateInformation()
 
-    def populate(self):
-        self.validateSerial()
-        self.fillLogView()
+    def populateInformation(self):
+        self.errorMessege.setText("")
         self.fillTestCardTable()
         self.fillInstrumentsTable()
         self.progressBar.setValue(int(self.session.stage/4*100))
-              
-    def fillLogView(self):
-        for script in self.session.model["scripts"]:
-            if "logpath" in script:
-                with open(script['logpath'], 'r') as logfile:
-                    logs = "".join(logfile.readlines())
-                    self.logEditor.appendPlainText(logs)
-   
+
     def fillTestCardTable(self):
         station_name = self.session.station['name']
         product_name = self.session.product['name']
@@ -425,84 +398,31 @@ class Card(QtWidgets.QDialog):
         self.instrumentTable.setItem(2, 0, QtWidgets.QTableWidgetItem(','.join(relayString)))
         self.instrumentTable.setItem(3, 0, QtWidgets.QTableWidgetItem(','.join(eloadString)))
         self.instrumentTable.setItem(4, 0, QtWidgets.QTableWidgetItem(','.join(analogString)))
-    
-    def validateSerial(self):
-        if self.serialInput.hasAcceptableInput():
-            self.errorMessege.setText("")
-            self.submitButton.setEnabled(True)
-        else:
-            self.errorMessege.setText("Input a serial number before committing. (Ex: A123456)")
-            self.submitButton.setEnabled(False)
-
-    def getSerial(self):
-        serialNumber = self.serialInput.text()
-        data = {
-            "serial_number": serialNumber,
-            "product_id":self.session.product["id"],
-            "model_id":self.session.model["id"],
-        }
-        response = requests.get(API_URL+'/card',headers=self.session.getAuth(),data=data)
-        if 200<=response.status_code and response.status_code<=300: # success
-            self.popup(serial = serialNumber, code = response.status_code, data=response.text)
-        else: # fail
-            self.errorMessege.setText(response.text)
-
-
-    def postSerial(self, serial):
-        files = {}
-        for script in self.session.model['scripts']:
-            logfile = open(script["logpath"], "rb")
-            files["{}-{}".format(script['id'], script['status'])] = logfile
-        data = {
-            "serial_number": serial,
-            "station_id":self.session.station["id"],
-            "product_id": self.session.product["id"],
-            "model_id":self.session.model["id"],
-        }
-        response = requests.post(API_URL+'/card',headers=self.session.getAuth(),data=data,files=files)
-        if response.status_code == 201: # success
-            self.errorMessege.setText(response.text)
-        else: # fail
-            self.errorMessege.setText(response.text)
-    
-    def popup(self, serial, code, data=None):
-        self.msg = QtWidgets.QMessageBox()
-        if code == 202: # ACCEPTED, overwrite 
-            self.msg.setWindowTitle("Confirmation to submit...")
-            self.msg.setIcon(QtWidgets.QMessageBox.Warning)
-            self.msg.setStandardButtons(QtWidgets.QMessageBox.No|QtWidgets.QMessageBox.Yes)
-            self.msg.setDefaultButton(QtWidgets.QMessageBox.No)
-            self.msg.setText("Serial Number {} is in database.".format(serial))
-            self.msg.setInformativeText("Do you want to overwrite previous entry?")
-            self.msg.setDetailedText(data)
-            if self.msg.exec() == QtWidgets.QMessageBox.Yes:
-                self.postSerial(serial)
-        elif code == 204: # NO_CONTENT, create new 
-            self.msg.setWindowTitle("Confirmation to submit...")
-            self.msg.setIcon(QtWidgets.QMessageBox.Information)
-            self.msg.setStandardButtons(QtWidgets.QMessageBox.No|QtWidgets.QMessageBox.Yes)
-            self.msg.setDefaultButton(QtWidgets.QMessageBox.No)
-            self.msg.setText("Serial Number {} is a new entry.".format(serial))
-            self.msg.setInformativeText("Do you want to submit as a new entry?")
-            if self.msg.exec() == QtWidgets.QMessageBox.Yes:
-                self.postSerial(serial)
-        elif code == 226: # IM_USED, new serial
-            self.msg.setWindowTitle("Confirmation to submit...")
-            self.msg.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            self.msg.setDefaultButton(QtWidgets.QMessageBox.Ok)
-            self.msg.setText("Serial Number {} is not available.".format(serial))
-            self.msg.setInformativeText("Please input a different serial number and try again.")
-            self.msg.setDetailedText(data)
-            if self.msg.exec() == QtWidgets.QMessageBox.Ok:
-                self.serialInput.setText(""),
-            
-            
 
     def cancel(self):
         self.session.decrementStage()
         widget.removeWidget(widget.currentWidget())
         widget.currentWidget().update()
+    
+    def submit(self):
+        serialNumber = self.serialNumber.text()
+        
+
+        data = {
+            "serial_number":serialNumber,
+            "station_id":self.session.station["id"],
+            "product_id": self.session.product["id"],
+            "model_id":self.session.model["id"],
+            "log_file":"hello"
+            }
+        response = requests.post(API_URL+'/card', headers=self.session.getAuth(), data=data)
+
+        if response.status_code != 200:
+            self.errorMessege.setText(response.text)
+        else:
+            self.errorMessege.setText("")
+
+
 
 
 if __name__ == "__main__":

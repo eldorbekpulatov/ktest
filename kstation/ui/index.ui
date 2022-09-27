@@ -129,7 +129,6 @@ font-size: 24pt;</string>
     </property>
     <property name="styleSheet">
      <string notr="true">font-size: 18pt;
-color:rgb(253, 102, 102);
 
 </string>
     </property>
@@ -166,7 +165,7 @@ color:rgb(253, 102, 102);
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(253, 102, 102);
+     <string notr="true">color:rgb(252, 26, 32);
 font-size:18pt;
 
 </string>
@@ -220,10 +219,10 @@ font-size:18pt;
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(253, 102, 102);</string>
+     <string notr="true">color:rgb(252, 46, 87)</string>
     </property>
     <property name="text">
-     <string>Error Messege:</string>
+     <string>Error Messeges:</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>

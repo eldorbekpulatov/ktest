@@ -10,9 +10,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 
 # local imports
-from ui.forms import *
+from .forms import *
 from ad.models import *
-from ui.decorator import *
+from .decorator import class_view_decorator
 
 
 
@@ -117,3 +117,34 @@ class TestSelectView(View):
         return redirect('powerSelect')
 
 
+# @class_view_decorator(login_required)
+# class TestStationSelect(View):
+#     template_name = "navigation/stations/stationSelect.html"
+
+#     def get(self, request):
+#         user = request.user
+#         form = TestStationForm()
+#         context = {"user":user, "form":form}
+#         return render(request, self.template_name, context)
+
+#     def post(self, request):
+#         user = request.user
+#         form = TestStationForm(request.POST)
+#         if form.is_valid():
+#             testStation = get_object_or_404(TestStation, id=form.data["testStation"])
+#             return redirect('stationView', tsId=testStation.pk)
+#         return redirect('stationSelect')
+
+
+# @class_view_decorator(login_required)
+# class TestStationView(View):
+#     template_name = "navigation/stations/stationView.html"
+
+#     def get(self, request, tsId):
+#         user = request.user
+#         station = get_object_or_404(TestStation, id=tsId)
+#         context = {"user":user, "station":station}
+#         return render(request, self.template_name, context)
+
+#     def post(self, request):
+#         return redirect('stationSelect')

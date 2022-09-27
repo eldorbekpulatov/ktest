@@ -286,7 +286,7 @@
      </property>
     </column>
    </widget>
-   <widget class="QLineEdit" name="serialInput">
+   <widget class="QLineEdit" name="serialNumber">
     <property name="geometry">
      <rect>
       <x>230</x>
@@ -304,17 +304,11 @@
    <widget class="QLabel" name="title">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>30</x>
       <y>35</y>
       <width>201</width>
       <height>31</height>
      </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>24</pointsize>
-     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">font-size:24pt;</string>
@@ -322,6 +316,29 @@
     <property name="text">
      <string>SERIAL NUMBER:</string>
     </property>
+   </widget>
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>240</y>
+      <width>721</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>719</width>
+       <height>269</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="exitButton">
     <property name="geometry">
@@ -353,71 +370,20 @@
      <string notr="true">background-color: rgb(102, 255, 102);</string>
     </property>
     <property name="text">
-     <string>Commit</string>
-    </property>
-   </widget>
-   <widget class="QPlainTextEdit" name="logEditor">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>280</y>
-      <width>721</width>
-      <height>231</height>
-     </rect>
-    </property>
-    <property name="horizontalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOff</enum>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
+     <string>Send</string>
     </property>
    </widget>
    <widget class="QLabel" name="errorMessege">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>250</y>
+      <y>230</y>
       <width>721</width>
       <height>21</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:white;
-color: red;</string>
-    </property>
     <property name="text">
      <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>230</y>
-      <width>141</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font-size:13pt;
-color:red;</string>
-    </property>
-    <property name="text">
-     <string>Error Messege:</string>
     </property>
    </widget>
   </widget>

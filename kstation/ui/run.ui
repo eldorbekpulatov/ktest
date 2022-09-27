@@ -103,9 +103,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>530</y>
+      <y>510</y>
       <width>391</width>
-      <height>21</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -115,7 +115,7 @@
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:white;
-color: rgb(253, 102, 102);</string>
+color: red;</string>
     </property>
     <property name="text">
      <string/>
@@ -127,7 +127,7 @@ color: rgb(253, 102, 102);</string>
       <x>10</x>
       <y>270</y>
       <width>391</width>
-      <height>231</height>
+      <height>211</height>
      </rect>
     </property>
    </widget>
@@ -135,7 +135,7 @@ color: rgb(253, 102, 102);</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>510</y>
+      <y>490</y>
       <width>141</width>
       <height>16</height>
      </rect>
@@ -148,10 +148,10 @@ color: rgb(253, 102, 102);</string>
     </property>
     <property name="styleSheet">
      <string notr="true">font-size:13pt;
-color:rgb(253, 102, 102);</string>
+color:red;</string>
     </property>
     <property name="text">
-     <string>Error Messege:</string>
+     <string>Error Messeges:</string>
     </property>
    </widget>
   </widget>
@@ -331,7 +331,7 @@ color:rgb(253, 102, 102);</string>
      <string>Next: Create</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="runSelButton">
+   <widget class="QPushButton" name="runSelectedButton">
     <property name="geometry">
      <rect>
       <x>10</x>
